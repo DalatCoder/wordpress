@@ -110,3 +110,61 @@ add_filter('hook', 'test_filter');
 
 For better visualization, we use the plugin
 called `Simply Show Hooks`
+
+### Action hooks
+
+Action hooks only work because of 2 functions
+that complete each other.
+
+- `do_action()`
+- `add_action()`
+
+`do_action` sets an action hook anywhere in the
+wordpress code. Example in `wp-settings.php`, search for `do_action`.
+
+`add_action` help you hook your callback
+functions.
+
+You can say that `do_action` is the point
+in the code where the hook is available and
+the `add_action` is where you will in fact
+hook your callback functions.
+
+Wordpress Load Workflow:
+
+Examples, place this code in `functions.php`
+of a theme.
+
+```php
+function add_div_tag_before() {
+    ?>
+        <div>The loop has started
+    <?php
+}
+add_action('loop_start', 'add_div_tag_before', 10);
+
+function add_section_tag_before() {
+    ?>
+        <div>The section has started
+    <?php
+}
+add_action('loop_start', 'add_section_tag_before', 11);
+
+function add_section_tag_end() {
+    ?>
+        The section has ended</div>
+    <?php
+}
+add_action('loop_end', 'add_section_tag_end', 9);
+
+function add_div_tag_end() {
+    ?>
+        The loop has ended</div>
+    <?php
+}
+add_action('loop_end', 'add_div_tag_end', 10);
+```
+
+If the callback have the same priority number,
+then the order is specified by the order
+in code.
