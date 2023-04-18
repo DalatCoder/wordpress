@@ -2,6 +2,8 @@
 
 ## Before begins
 
+WordPress workflow: [Link](https://gist.github.com/johnbillion/4fa3c4228a8bb53cc71d)
+
 Setup tools
 
 - XAMPP
@@ -168,3 +170,63 @@ add_action('loop_end', 'add_div_tag_end', 10);
 If the callback have the same priority number,
 then the order is specified by the order
 in code.
+
+### Filter hooks
+
+The `filter` hook received `param` and
+return that `param`, but in a modified format.
+
+`filter` works through a pair of functions
+that work together
+
+- `apply_filters()`
+- `add_filter()`
+
+`apply_filter` is the one that defines
+the filter within WordPress code.
+
+Open `post-template.php` file and search for
+the `the_content` function.
+
+```php
+function the_content() {
+    // some works 
+
+    $content = apply_filters('the_content', $content)
+
+    echo $content;
+}
+```
+
+`add_filter` is for you to modify the value
+of the `filter`.
+
+```php
+function modify_content($content) {
+    return $content . ' Copyright 2021, All Rights reserved';
+}
+add_filter('the_content', 'modify_content');
+```
+
+Or
+
+```php
+function modify_body_classes($classes, $class) {
+    if (is_single()) {
+        $class[] = 'test-single';
+        $classes = array_merge($classes, $class);
+    }
+    return $classes;
+}
+
+add_filter('body_class', 'modify_body_classes', 10, 2);
+```
+
+WP divides `filter` into 2 groups:
+
+- `filters` that apply to information that is
+  read from the database first and then filtered out. (`the_content`)
+- `filters` that apply to some information and
+  later sent to the database. (`content_save_pre`)
+
+Filter references: [link](https://codex.wordpress.org/Plugin_API/Filter_Reference)
