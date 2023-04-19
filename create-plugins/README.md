@@ -353,3 +353,28 @@ Set up plugin with `OOP` in PHP
 
  # $mv_slider->start();
 ```
+
+### Define some plugin constants
+
+- Plugin directory path (file system path): `define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));`, we will get the path like this: `/home/www/your_side/wp-content/plugins/your_plugins/`
+
+- Plugin URL path: `define('MV_SLIDER_URL', plugin_dir_url(__FILE__));`,
+  used for browser to load `js` and `css` files. We also can use `plugins_url()` or `plugin_basename()` to get the URL path.
+
+- `version`: for reset cache of `js` and `css` file.
+
+```php
+<?php
+
+ class MV_Slider {
+    function __construct() {
+        $this->define_constants();
+    }
+
+    public function define_constants() {
+        define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+        define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+        define('MV_SLIDER_VERSION', '1.0.0');
+    }
+ }
+```
