@@ -230,3 +230,92 @@ WP divides `filter` into 2 groups:
   later sent to the database. (`content_save_pre`)
 
 Filter references: [link](https://codex.wordpress.org/Plugin_API/Filter_Reference)
+
+## MV Slider Plugin Project
+
+### Overview
+
+Slideshow plugin, based on FlexSlider2 at [link](http://flexslider.woothemes.com) or OwlCarousel.
+
+Learn:
+
+- Custom Post Type & Custom Fields & Metabox
+- Menu & Submenu
+- Manage slide
+- Settings page & Options API
+- Shortcode & How to use the plugin on the Frontend Page
+- Add `css` and `js` both on FE and BE
+- Translation
+- How to uninstall plugin
+- Security notions
+- Validate fields & sanitization
+
+### Structuring the plugin
+
+- Directory: `wp-content` -> `plugins`
+- Simple: one php file: `hello.php`
+- Complex: `wp-content` -> `plugins` -> `mv-slider`
+
+`mv-slider`:
+
+- `assets`
+  - `css`
+  - `images`
+  - `js`
+
+- `functions`
+- `languages`
+- `post-types`
+- `shortcodes`
+- `vendor`
+- `views`
+- `mv-slider.php`: main file
+
+In the main file `mv-slider.php`
+
+Add some plugin information throught comment
+
+```php
+<?php 
+/**
+ * Plugin Name: MV Slider
+ * Plugin URI: https://wordpress.org/mv-slider
+ * Description: My plugin's description
+ * Version: 1.0.0
+ * Requires at least: 5.6
+ * Author: Hieu Nguyen Trong
+ * Author URI: https://dalatcoder.github.io
+ */
+```
+
+Add `text-domain` for translation and the folder contains all
+the translated strings.
+
+```php
+<?php 
+/**
+ * Text Domain: mv-slider
+ * Domain Path: /languages
+ */
+```
+
+Create `index.php` in the root of the `mv-slider` folder to prevent
+other user to list all the files inside the plugin folder (using the URL).
+We only want our plugin can be run and accessed by WP and no one else.
+
+```php
+<?php 
+# Silence is golden
+```
+
+Another check to prevent someone execute the plugin `.php` file directly.
+We only want WP access and run those plugin files. In the `mv-slider.php`
+file, we check for the constant `ABSPATH`
+
+```php
+if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+}
+```
+
+We can try to access the file via browser: `host/wp-content/plugins/mv-slider/mv-slider.php`
