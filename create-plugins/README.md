@@ -319,3 +319,37 @@ if (!defined('ABSPATH')) {
 ```
 
 We can try to access the file via browser: `host/wp-content/plugins/mv-slider/mv-slider.php`
+
+### Plugin with `class` and plugin without `class`
+
+In the course, the author will try to be as close as possible to
+the MVC pattern.
+
+Most of our `.php` files are going to be class based.
+
+Using `class` to seperate the responsibility of each file or using
+single `.php` file for the plugin.
+
+Set up plugin with `OOP` in PHP
+
+```php
+<?php 
+
+ if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+ }
+
+ if (class_exists('MV_Slider')) {
+    die('The class with the same name MV_Slider already exists');
+ }
+
+ class MV_Slider {
+    function __construct() {
+
+    }
+ }
+
+ $mv_slider = new MV_Slider();
+
+ # $mv_slider->start();
+```
