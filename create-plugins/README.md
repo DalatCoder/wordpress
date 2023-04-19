@@ -547,3 +547,129 @@ Instantiate our CPT
     }
  }
 ```
+
+### Metabox API
+
+Terms:
+
+- Metabox: UI
+- Metadata: some related information link to CPT
+
+### Add Metabox
+
+- Using action hook `add_metabox`
+- Or add attribute `register_meta_box_cb` in the `register_post_type` function
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_action('init', [$this, 'create_post_type']);
+            add_action('add_meta_boxes', [$this, 'add_meta_boxes']);
+        }
+
+        public function create_post_type() {
+            register_post_type(
+                'mv_slider', 
+                [
+                    'label' => 'Slider',
+                    'description' => 'Sliders',
+                    'labels' => [
+                        'name' => 'Sliders',
+                        'singular_name' => 'Slider'
+                    ],
+                    'public' => true,
+                    'supports' => [
+                        'title',
+                        'editor',
+                        'thumbnail'
+                    ],
+                    'hierarchical' => false,
+                    'show_ui' => true,
+                    'show_in_menu' => true,
+                    'menu_position' => 5,
+                    'show_in_admin_bar' => true,
+                    'show_in_nav_menus' => true,
+                    'can_export' => true,
+                    'has_archive' => false,
+                    'exclude_from_search' => false,
+                    'publicly_queryable' => true,
+                    'show_in_rest' => true,
+                    'menu_icon' => 'dashicons-images-alt2'
+                ]
+            );
+        }
+
+        public function add_meta_boxes() {
+            add_meta_box(
+                'mv_slider_meta_box',
+                'Link Options',
+                [$this, 'add_inner_meta_boxes'],
+                'mv_slider',
+                'normal',
+                'high',
+            );
+        }
+
+        public function add_inner_meta_boxes($post) {
+
+        }
+    }
+}
+```
+
+### Create form inside metabox
+
+Create new view file at `views/mv-slider_metabox.php` and then require
+it inside the function
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_action('init', [$this, 'create_post_type']);
+            add_action('add_meta_boxes', [$this, 'add_meta_boxes']);
+        }
+
+        public function create_post_type() {
+        }
+
+        public function add_meta_boxes() {
+        }
+
+        public function add_inner_meta_boxes($post) {
+            require_once(MV_SLIDER_PATH . 'views/mv-slider_metabox.php');
+        }
+    }
+}
+```
+
+For the view, we use the table to construct the UI
+
+```php
+<table class="form-table mv-slider-metabox">
+    <tr>
+        <th>
+            <label for="mv_slider_link_text">Link Text</label>
+        </th>
+        <td>
+            <input type="text" name="mv_slider_link_text" id="mv_slider_link_text" class="regular-text link-text"
+                value="" required>
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            <label for="mv_slider_link_url">Link URL</label>
+        </th>
+        <td>
+            <input type="url" name="mv_slider_link_url" id="mv_slider_link_url" class="regular-text link-url"
+                value="" required>
+        </td>
+    </tr>
+</table>
+```
