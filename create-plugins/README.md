@@ -422,3 +422,128 @@ Or we can use 2 functions with code
 
  $mv_slider = new MV_Slider();
 ```
+
+### Creating custom post type
+
+Some wordpress default post types: `select post_type from wp_posts group by post_type`:
+
+- attachment: images,...
+- page
+- post
+- revision
+
+Create new custom post type:
+
+- create file `mv-slider-cpt.php` inside `post-types` directory
+
+```php
+<?php 
+
+if (class_exists('MV_Slider_Post_Type')) {
+    die('Class with name MV_Slider_Post_Type already exist.');
+}
+
+class MV_Slider_Post_Type {
+    function __construct() {
+        add_action('init', [$this, 'create_post_type']);
+    }
+
+    public function create_post_type() {
+        register_post_type(
+            'mv_slider', 
+            [
+                'label' => 'Slider',
+                'description' => 'Sliders',
+                'labels' => [
+                    'name' => 'Sliders',
+                    'singular_name' => 'Slider'
+                ],
+                'public' => true
+            ]
+        );
+    }
+}
+```
+
+Some attributes:
+
+- `public`: our CPT will be available for accessing by BE and FE,
+  the default value is `false`. WP `revision` is not `public`, so
+  no one can access it.
+
+- `supports`: the resources that are avaiable in the edit area of our CPT.
+  By default, it supports the title and the editor
+
+- `hierarchical`: create parent and child post relationship, the default
+  value is `false`. It only works with page, we must enable page attribute
+  in the `supports` field like this: `['page-attributes']`
+
+- `show_ui`: related to the `public` attribute, if `true`, we will see
+  the post table, post edit area,... Post `revision` is not public and
+  does not have the user interface for any to edit.
+
+- `show_in_menu`: visible in admin menu or not
+- `menu_position`: position, 5
+- `archive page` in the frontend:
+  - `has_archive`
+  - `exclude_from_search`
+  - `publicly_queryable`
+
+- Support REST API and Block editor: `show_in_rest = true`
+
+```php
+<?php
+register_post_type(
+    'mv_slider', 
+    [
+        'label' => 'Slider',
+        'description' => 'Sliders',
+        'labels' => [
+            'name' => 'Sliders',
+            'singular_name' => 'Slider'
+        ],
+        'public' => true,
+        'supports' => [
+            'title',
+            'editor',
+            'thumbnail'
+        ],
+        'hierarchical' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_position' => 5,
+        'show_in_admin_bar' => true,
+        'show_in_nav_menus' => true,
+        'can_export' => true,
+        'has_archive' => false,
+        'exclude_from_search' => false,
+        'publicly_queryable' => true,
+        'show_in_rest' => true,
+        'menu_icon' => 'dashicons-images-alt2'
+    ]
+);
+```
+
+Instantiate our CPT
+
+```php
+ class MV_Slider {
+    function __construct() {
+        $this->define_constants();
+
+        require_once(MV_SLIDER_PATH . 'post-types/mv-slider-cpt.php');
+        new MV_Slider();
+    }
+
+    public function define_constants() {
+        define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+        define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+        define('MV_SLIDER_VERSION', '1.0.0');
+    }
+
+    public static function deactivate() {
+        flush_rewrite_rules();
+        unregister_post_type('mv-slider');
+    }
+ }
+```
