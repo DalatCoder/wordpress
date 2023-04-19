@@ -378,3 +378,47 @@ Set up plugin with `OOP` in PHP
     }
  }
 ```
+
+### Active, deactive and uninstall methods
+
+We want to execute some code when the plugin is installing, deactivating
+or uninstalling.
+
+When our plugin have the archived page, WP can not immediately recognize
+the link structure, so the `404` error will occur. To handle this,
+we can manually recreate the site's permanent links in the WP setting page.
+Or we can use 2 functions with code
+
+- `update_option('rewrite_rules', '')`: more performance
+- `flush_rewrite_rules()`
+
+```php
+<?php
+
+ class MV_Slider {
+    function __construct() {
+        $this->define_constants();
+    }
+
+    public function define_constants() {
+    }
+
+    public static function activate() {
+        update_option('rewrite_rules', '');
+    }
+
+    public static function deactivate() {
+        flush_rewrite_rules();
+    }
+
+    public static function uninstall() {
+
+    }
+ }
+
+ register_activation_hook(__FILE__, ['MV_Slider', 'activate']);
+ register_deactivation_hook(__FILE__, ['MV_Slider', 'deactivate']);
+ register_uninstall_hook(__FILE__, ['MV_Slider', 'uninstall']);
+
+ $mv_slider = new MV_Slider();
+```
