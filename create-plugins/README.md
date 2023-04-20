@@ -1129,3 +1129,186 @@ Then, add 2 submenu to manage our CPT.
     $mv_slider = new MV_Slider();
  }
 ```
+
+### Setting page & option API
+
+#### Introduction
+
+Store all plugin setting key-value pairs inside the `wp_options` table using
+`Options API`
+
+Some advantages of using setting page & options api:
+
+- Don't have to build UI from scratch
+- Don't have to worry about security issues such as nonce,...
+
+#### Building form
+
+Setting up our view file
+
+```php
+<?php
+
+ if (!class_exists('MV_Slider')) {
+    class MV_Slider {
+        function __construct() {
+            add_action('admin_menu', [$this, 'add_menu']);
+        }
+
+        public function add_menu() {
+            add_menu_page(
+                'MV Slider Options',
+                'MV Slider',
+                'manage_options',
+                'mv_slider_admin',
+                [$this, 'mv_slider_settings_page'],
+                'dashicons-images-alt2'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Manage Slides',
+                'Manage Slides',
+                'manage_options',
+                'edit.php?post_type=mv_slider'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Add New Slide',
+                'Add New Slide',
+                'manage_options',
+                'post-new.php?post_type=mv_slider'
+            );
+        }
+
+        public function mv_slider_settings_page() {
+            require_once(MV_SLIDER_PATH . 'views/setting-page.php');
+        }
+    }
+ }
+```
+
+Add basic form
+
+```php
+<div class="wrap">
+    <h1><?= esc_html(get_admin_page_title()) ?></h1>
+    <form action="options.php" method="post">
+
+    </form>
+</div>
+```
+
+All form data will be post to `options.php` to be handled. We can also
+view all options by access to `https://<site>/wp-admin/options.php`
+
+To add field and section to our form, we must use 2 WP functions
+
+- `settings_fields()`
+- `do_secttings_sections()`
+
+#### Adding sections and fields
+
+Register setting key
+
+```php
+<?php
+
+if (!class_exists('MV_Slider_Settings')) {
+    class MV_Slider_Settings {
+        public function __construct() {
+            add_action('admin_init', [$this, 'admin_init']);
+        }
+
+        public function admin_init() {
+            register_setting('mv_slider_group', 'mv_slider_options');
+        }
+    }
+}
+```
+
+All setting values will be store in 1 array, to get those option
+easier, we use the static attribute `$options`
+
+```php
+<?php
+
+if (!class_exists('MV_Slider_Settings')) {
+    class MV_Slider_Settings {
+        public static $options;
+
+        public function __construct() {
+            self::$options = get_option('mv_slider_options');
+
+            add_action('admin_init', [$this, 'admin_init']);
+        }
+
+        public function admin_init() {
+            register_setting('mv_slider_group', 'mv_slider_options');
+        }
+    }
+}
+```
+
+Now we can access an option value by using `MV_Slider_Settings::options['key']`
+
+To add a section to our setting page, do the following:
+
+- First, register our section with: `add_settings_section` and `add_settings_field`
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Settings')) {
+    class MV_Slider_Settings {
+        public static $options;
+
+        public function __construct() {
+            self::$options = get_option('mv_slider_options');
+
+            add_action('admin_init', [$this, 'admin_init']);
+        }
+
+        public function admin_init() {
+            register_setting('mv_slider_group', 'mv_slider_options');
+
+            add_settings_section(
+                'mv_slider_main_section',
+                'How does it works?',
+                null,
+                'mv_slider_settings_page1'
+            );
+
+            add_settings_field(
+                'mv_slider_shortcode',
+                'Shortcode',
+                [$this, 'mv_slider_shortcode'], 
+                'mv_slider_settings_page1',
+                'mv_slider_main_section'
+            );
+        }
+
+        public function mv_slider_shortcode() {
+            ?>
+            <span>Use the shortcode [mv_slider] to display the slider on any page/post/widget</span>
+            <?php
+        }
+    }
+}
+```
+
+- Second, `echo` out the UI via `settings_fields`, `do_settings_sections` and `submit_button`
+
+```php
+<div class="wrap">
+    <h1><?= esc_html(get_admin_page_title()) ?></h1>
+    <form action="options.php" method="post">
+        <?php
+            settings_fields('mv_slider_group');
+            do_settings_sections('mv_slider_settings_page1');
+            submit_button('Save settings');
+        ?>
+    </form>
+</div>
+```
