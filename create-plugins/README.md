@@ -714,3 +714,64 @@ Those functions are wrapper for 4 basic WP functions with metadata:
 - `get_metadata`
 - `update_metadata`
 - `delete_metadata`
+
+```php
+<?php
+
+function save_post($post_id) {
+    if (isset($_POST['action']) && $_POST['action'] == 'editpost') {
+        $old_text = get_post_meta($post_id, 'mv_slider_link_text', true);
+        $old_url = get_post_meta($post_id, 'mv_slider_link_url', true);
+
+        $new_text = $_POST['mv_slider_link_text'];
+        $new_url = $_POST['mv_slider_link_url'];
+
+        update_post_meta($post_id, 'mv_slider_link_text', $new_text, $old_text);
+        update_post_meta($post_id, 'mv_slider_link_url', $new_url, $old_url);
+    }
+}
+```
+
+### Validating and sanitizing data before saving
+
+> Never trust user supplied information
+
+All information you get from the user should be filtered on input and
+escaped on output.
+
+A very common type of attack is `xss`. Basically, if your application allows
+JS code to be stored in the DB. It can be executed on the FE, which leaves the door
+open for several type of attacks.
+
+```php
+<?php 
+
+function save_post($post_id) {
+    if (isset($_POST['action']) && $_POST['action'] == 'editpost') {
+        $old_text = get_post_meta($post_id, 'mv_slider_link_text', true);
+        $old_url = get_post_meta($post_id, 'mv_slider_link_url', true);
+
+        $new_text = $_POST['mv_slider_link_text'];
+        $new_url = $_POST['mv_slider_link_url'];
+
+        // sanitization
+        $new_text = sanitize_text_field($new_text);
+        $new_url = sanitize_text_field($new_url);
+
+        // validation
+        if (empty($new_text)) {
+            $new_text = 'Add some text';
+        }
+        if (empty($new_url)) {
+            $new_url = 'Add some URL';
+        }
+
+        update_post_meta($post_id, 'mv_slider_link_text', $new_text, $old_text);
+        update_post_meta($post_id, 'mv_slider_link_url', $new_url, $old_url);
+    }
+}
+```
+
+Now, if the `$new_text` = `"<script>alert(0)</script>"`, it will be sanitized to
+`""`, add then, the validation process occur, assign the default text `"Add some text"`
+to the `$new_text` variable.
