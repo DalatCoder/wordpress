@@ -1673,3 +1673,416 @@ jQuery(window).load(function() {
   });
 });
 ```
+
+#### Create shortcode view
+
+Create simple view with raw HTML
+
+```php
+<h3>Title</h3>
+
+<div class="mv-slider flexsider">
+    <ul class="slides">
+        <li>
+            <div class="mvs-container">
+                <div class="slider-details-container">
+                    <div class="wrapper">
+                        <div class="slider-title">
+                            <h2>Slider title</h2>
+                        </div>
+                        <div class="slider-description">
+                            <div class="subtitle">Subtitle</div>
+                            <a class="link" href="#">Button text</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+```
+
+Read HTML and return it inside shortcode.
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Shortcode')) {
+    class MV_Slider_Shortcode {
+        public function __construct() {
+            add_shortcode('mv_slider', [$this, 'add_shortcode']);
+        }
+
+        public function add_shortcode($attributes = [], $content = null, $tag = '') {
+            $attributes = array_change_key_case((array)$attributes, CASE_LOWER);
+
+            extract(
+                shortcode_atts(
+                    [
+                        'id' => '',
+                        'orderby' => 'date'
+                    ],
+                    $attributes,
+                    $tag
+                )
+            );
+
+            if (!empty($id)) {
+                $id = array_map('absint', explode(',', $id));
+            }
+
+            ob_start();
+            require(MV_SLIDER_PATH . 'views/mv-slider_shortcode.php');
+
+            return ob_get_clean();
+        }
+    }
+}
+```
+
+Using `require` to handle if the user include the `mv_slider` shortcode twice
+inside the same page.
+
+Using `ob_start()` and `ob_get_clean()` to get HTML from buffer and return it.
+
+Get slider title from DB and display on shortcode view
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Shortcode')) {
+    class MV_Slider_Shortcode {
+        public function __construct() {
+            add_shortcode('mv_slider', [$this, 'add_shortcode']);
+        }
+
+        public function add_shortcode($attributes = [], $content = null, $tag = '') {
+            $attributes = array_change_key_case((array)$attributes, CASE_LOWER);
+
+            extract(
+                shortcode_atts(
+                    [
+                        'id' => '',
+                        'orderby' => 'date'
+                    ],
+                    $attributes,
+                    $tag
+                )
+            );
+
+            if (!empty($id)) {
+                $id = array_map('absint', explode(',', $id));
+            }
+
+            $slider_title = MV_Slider_Settings::$options['mv_slider_title'];
+            if (!empty($content)) {
+                $slider_title = esc_html($content);
+            }
+
+            ob_start();
+            require(MV_SLIDER_PATH . 'views/mv-slider_shortcode.php');
+
+            return ob_get_clean();
+        }
+    }
+}
+```
+
+#### Using custom loop from WP_Query to get CPT data
+
+Build custom query from `WP_Query`
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Shortcode')) {
+    class MV_Slider_Shortcode {
+        public function __construct() {
+            add_shortcode('mv_slider', [$this, 'add_shortcode']);
+        }
+
+        public function add_shortcode($attributes = [], $content = null, $tag = '') {
+            $attributes = array_change_key_case((array)$attributes, CASE_LOWER);
+
+            extract(
+                shortcode_atts(
+                    [
+                        'id' => '',
+                        'orderby' => 'date'
+                    ],
+                    $attributes,
+                    $tag
+                )
+            );
+
+            if (!empty($id)) {
+                $id = array_map('absint', explode(',', $id));
+            }
+
+            $slider_title = MV_Slider_Settings::$options['mv_slider_title'];
+            if (!empty($content)) {
+                $slider_title = esc_html($content);
+            }
+
+            $query_args = [
+                'post_type' => 'mv_slider',
+                'post_status' => 'publish',
+                'orderby' => $orderby
+            ];
+
+            if (!empty($id)) {
+                $query_args['post__in'] = $id;
+            }
+
+            $query = new WP_Query($query_args);
+
+            ob_start();
+            require(MV_SLIDER_PATH . 'views/mv-slider_shortcode.php');
+
+            return ob_get_clean();
+        }
+    }
+}
+```
+
+Using loop to get all CPT
+
+```php
+<h3><?= $slider_title ?></h3>
+
+<div class="mv-slider flexsider">
+    <ul class="slides">
+        <?php 
+            if ($query->have_posts()):
+                while($query->have_posts()):
+                    $query->the_post();
+
+                    $button_text = get_post_meta(get_the_ID(), 'mv_slider_link_text', true);
+                    $button_url = get_post_meta(get_the_ID(), 'mv_slider_link_url', true);
+        ?>
+            <li>
+                <?php the_post_thumbnail('full', ['class' => 'img-fluid']) ?>
+                <div class="mvs-container">
+                    <div class="slider-details-container">
+                        <div class="wrapper">
+                            <div class="slider-title">
+                                <h2><?php the_title(); ?></h2>
+                            </div>
+                            <div class="slider-description">
+                                <div class="subtitle"><?php the_content(); ?></div>
+                                <a class="link" href="<?= esc_attr($button_url) ?>"><?= esc_html($button_text) ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        <?php
+            endwhile;
+            wp_reset_postdata();
+        endif;
+        ?>
+    </ul>
+</div>
+```
+
+#### Register and enqueue scripts
+
+WP puts each `js` and `css` inside a queue and enqueue it in order.
+
+- `wp_enqueue_script` for FE client
+- `admin_enqueue_script` for FE admin
+
+First, we need to register the need scripts and styles
+
+```php
+<?php
+
+/**
+ * Plugin Name: MV Slider
+ * Plugin URI: https://wordpress.org/mv-slider
+ * Description: My plugin's description
+ * Version: 1.0.0
+ * Requires at least: 5.6
+ * Author: Hieu Nguyen Trong
+ * Author URI: https://dalatcoder.github.io
+ * Text Domain: mv-slider
+ * Domain Path: /languages
+ */
+
+ if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+ }
+
+ if (!class_exists('MV_Slider')) {
+    class MV_Slider {
+        function __construct() {
+            $this->define_constants();
+
+            add_action('admin_menu', [$this, 'add_menu']);
+
+            require_once(MV_SLIDER_PATH . 'post-types/mv-slider-cpt.php');
+            new MV_Slider_Post_Type();
+
+            require_once(MV_SLIDER_PATH . 'mv-slider-settings.php');
+            new MV_Slider_Settings();
+
+            require_once(MV_SLIDER_PATH . 'shortcodes/mv-slider-shortcode.php');
+            new MV_Slider_Shortcode();
+
+            add_action('wp_enqueue_scripts', [$this, 'register_scripts'], 999);
+        }
+
+        public function define_constants() {
+            define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+            define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+            define('MV_SLIDER_VERSION', '1.0.0');
+        }
+
+        public static function activate() {
+            update_option('rewrite_rules', '');
+        }
+
+        public static function deactivate() {
+            flush_rewrite_rules();
+            unregister_post_type('mv-slider');
+        }
+
+        public static function uninstall() {
+
+        }
+
+        public function add_menu() {
+            add_menu_page(
+                'MV Slider Options',
+                'MV Slider',
+                'manage_options',
+                'mv_slider_admin',
+                [$this, 'mv_slider_settings_page'],
+                'dashicons-images-alt2'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Manage Slides',
+                'Manage Slides',
+                'manage_options',
+                'edit.php?post_type=mv_slider'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Add New Slide',
+                'Add New Slide',
+                'manage_options',
+                'post-new.php?post_type=mv_slider'
+            );
+        }
+
+        public function mv_slider_settings_page() {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            if (isset($_GET['settings-updated'])) {
+                add_settings_error('mv_slider_options', 'mv_slider_message', 'Settings Saved', 'success');
+            }
+            settings_errors('mv_slider_options');
+
+            require_once(MV_SLIDER_PATH . 'views/setting-page.php');
+        }
+
+        public function register_scripts() {
+            wp_register_script(
+                'mv-slider-main-jq', 
+                MV_SLIDER_URL . 'vendor/flexslider/jquery.flexslider-min.js',
+                ['jquery'],
+                MV_SLIDER_VERSION,
+                true
+            );
+
+            wp_register_script(
+                'mv-slider-options-js', 
+                MV_SLIDER_URL . 'vendor/flexslider/flexslider.js',
+                ['jquery'],
+                MV_SLIDER_VERSION,
+                true
+            );
+
+            wp_register_style(
+                'mv-slider-main-css',
+                MV_SLIDER_URL . 'vendor/flexslider/flexslider.css',
+                [],
+                MV_SLIDER_VERSION,
+                'all'
+            );
+        }
+    }
+ }
+
+ if (class_exists('MV_Slider')) {
+    register_activation_hook(__FILE__, ['MV_Slider', 'activate']);
+    register_deactivation_hook(__FILE__, ['MV_Slider', 'deactivate']);
+    register_uninstall_hook(__FILE__, ['MV_Slider', 'uninstall']);
+
+    $mv_slider = new MV_Slider();
+ }
+```
+
+Then, we can enqueue it when we need
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Shortcode')) {
+    class MV_Slider_Shortcode {
+        public function __construct() {
+            add_shortcode('mv_slider', [$this, 'add_shortcode']);
+        }
+
+        public function add_shortcode($attributes = [], $content = null, $tag = '') {
+            $attributes = array_change_key_case((array)$attributes, CASE_LOWER);
+
+            extract(
+                shortcode_atts(
+                    [
+                        'id' => '',
+                        'orderby' => 'date'
+                    ],
+                    $attributes,
+                    $tag
+                )
+            );
+
+            if (!empty($id)) {
+                $id = array_map('absint', explode(',', $id));
+            }
+
+            $slider_title = MV_Slider_Settings::$options['mv_slider_title'];
+            if (!empty($content)) {
+                $slider_title = esc_html($content);
+            }
+
+            $query_args = [
+                'post_type' => 'mv_slider',
+                'post_status' => 'publish',
+                'orderby' => $orderby
+            ];
+
+            if (!empty($id)) {
+                $query_args['post__in'] = $id;
+            }
+
+            $query = new WP_Query($query_args);
+
+            ob_start();
+            require(MV_SLIDER_PATH . 'views/mv-slider_shortcode.php');
+
+            wp_enqueue_script('mv-slider-main-jq');
+            wp_enqueue_script('mv-slider-options-js');
+            wp_enqueue_style('mv-slider-main-css');
+
+            return ob_get_clean();
+        }
+    }
+}
+```
