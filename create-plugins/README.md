@@ -1574,7 +1574,7 @@ Prevent user from accessing the setting page directly by URL
  }
 ```
 
-### Splitting tabs
+#### Splitting tabs
 
 ```php
 <?php 
@@ -1605,4 +1605,71 @@ Prevent user from accessing the setting page directly by URL
         ?>
     </form>
 </div>
+```
+
+### Shortcode API
+
+They are shortcut, they are short tags that any WP user can add to post,
+page or anywhere else.
+
+The goal is to make thing easier for the plugins and the users
+instead of having to write code.
+
+- Shortcode tag: `[mv_slider]`
+- Shortcode attributes: `[mv_slider id='1' orderby='random']`
+- Or using completed tag with content like this: `[mv_slider]Hello world[/mv_slider]`
+
+#### Create shortcode class
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Shortcode')) {
+    class MV_Slider_Shortcode {
+        public function __construct() {
+            add_shortcode('mv_slider', [$this, 'add_shortcode']);
+        }
+
+        public function add_shortcode($attributes = [], $content = null, $tag = '') {
+            $attributes = array_change_key_case($attributes, CASE_LOWER);
+
+            extract(
+                shortcode_atts(
+                    [
+                        'id' => '',
+                        'orderby' => 'date'
+                    ],
+                    $attributes,
+                    $tag
+                )
+            );
+
+            if (!empty($id)) {
+                $id = array_map('absint', explode(',', $id));
+            }
+        }
+    }
+}
+```
+
+#### Download flexslider2 files
+
+[Flexslider](http://flexslider.woothemes.com/)
+
+Setup `vendor` folder
+
+- Create folder `vendor/flexsider`
+- Put `css`, `js` and `fonts` from flexsider
+- Create main js file with the following
+
+```js
+jQuery(window).load(function() {
+  jQuery('.flexslider').flexslider({
+    animation: "slide",
+    touch: true,
+    directionNav: false,
+    smoothHeight: true,
+    controlNav: true
+  });
+});
 ```
