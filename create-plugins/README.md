@@ -673,3 +673,44 @@ For the view, we use the table to construct the UI
     </tr>
 </table>
 ```
+
+### Saving metabox data
+
+Using action hook called `save_post` to intercept the process of
+wordpress.
+
+WP automatically create a form to wrap our metabox data. We can get those data
+from `$_POST`. To ensure data is from the post, we can compare the `$_POST['action']`
+with the value of `editpost`
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_action('save_post', [$this, 'save_post'], 10, 2);
+        }
+
+        public function save_post($post_id) {
+            if (isset($_POST['action']) && $_POST['action'] == 'editpost') {
+
+            }
+        }
+    }
+}
+```
+
+To dealt with post meta, we can use the functions:
+
+- `add_post_meta`: C
+- `get_post_meta`: R
+- `update_post_meta`: U
+- `delete_post_meta`: D
+
+Those functions are wrapper for 4 basic WP functions with metadata:
+
+- `add_metadata`
+- `get_metadata`
+- `update_metadata`
+- `delete_metadata`
