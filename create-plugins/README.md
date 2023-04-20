@@ -893,3 +893,75 @@ function save_post($post_id) {
     }
 }
 ```
+
+### Showing values on the post type table
+
+We use a filter to hijack the content displaying on the table: `manage_<cpt>_posts_columns`.
+
+To add new columns:
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_filter('manage_mv_slider_posts_columns', [$this, 'add_custom_columns']);
+        }
+
+        public function add_custom_columns($columns) {
+            $columns['mv_slider_link_text'] = 'Link text';
+            $columns['mv_slider_link_url'] = 'Link url';
+
+            return $columns;
+        }
+    }
+}
+```
+
+To edit the content of our custom columns, we use the action hook called `manage_<cpt>_posts_custom_column`
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_action('manage_mv_slider_posts_custom_column', [$this, 'add_custom_columns_content'], 10, 2);
+        }
+
+        public function add_custom_columns_content($column, $post_id) {
+            switch($column) {
+                case 'mv_slider_link_text':  
+                    $text = get_post_meta($post_id, 'mv_slider_link_text', true);
+                    echo esc_html($text);
+                    break;
+
+                case 'mv_slider_link_url':  
+                    $url = get_post_meta($post_id, 'mv_slider_link_url', true);
+                    echo esc_url($url);
+                    break;
+            }
+        }
+    }
+}
+```
+
+To add sort feature to a column, we use the filter called `manage_edit-<cpt>_sortable_columns`
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Post_Type')) {
+    class MV_Slider_Post_Type {
+        function __construct() {
+            add_filter('manage_edit-mv_slider_sortable_columns', [$this, 'add_sortable_columns']);
+        }
+
+        public function add_sortable_columns($columns) {
+            $columns['mv_slider_link_text'] = 'mv_slider_link_text';
+            return $columns;
+        }
+    }
+}
+```
