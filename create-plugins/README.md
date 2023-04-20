@@ -1366,3 +1366,210 @@ if (!class_exists('MV_Slider_Settings')) {
     }
 }
 ```
+
+#### Manage permissions
+
+Prevent user from accessing the setting page directly by URL
+
+```php
+<?php
+
+/**
+ * Plugin Name: MV Slider
+ * Plugin URI: https://wordpress.org/mv-slider
+ * Description: My plugin's description
+ * Version: 1.0.0
+ * Requires at least: 5.6
+ * Author: Hieu Nguyen Trong
+ * Author URI: https://dalatcoder.github.io
+ * Text Domain: mv-slider
+ * Domain Path: /languages
+ */
+
+ if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+ }
+
+ if (!class_exists('MV_Slider')) {
+    class MV_Slider {
+        function __construct() {
+            $this->define_constants();
+
+            add_action('admin_menu', [$this, 'add_menu']);
+
+            require_once(MV_SLIDER_PATH . 'post-types/mv-slider-cpt.php');
+            new MV_Slider_Post_Type();
+
+            require_once(MV_SLIDER_PATH . 'mv-slider-settings.php');
+            new MV_Slider_Settings();
+        }
+
+        public function define_constants() {
+            define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+            define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+            define('MV_SLIDER_VERSION', '1.0.0');
+        }
+
+        public static function activate() {
+            update_option('rewrite_rules', '');
+        }
+
+        public static function deactivate() {
+            flush_rewrite_rules();
+            unregister_post_type('mv-slider');
+        }
+
+        public static function uninstall() {
+
+        }
+
+        public function add_menu() {
+            add_menu_page(
+                'MV Slider Options',
+                'MV Slider',
+                'manage_options',
+                'mv_slider_admin',
+                [$this, 'mv_slider_settings_page'],
+                'dashicons-images-alt2'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Manage Slides',
+                'Manage Slides',
+                'manage_options',
+                'edit.php?post_type=mv_slider'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Add New Slide',
+                'Add New Slide',
+                'manage_options',
+                'post-new.php?post_type=mv_slider'
+            );
+        }
+
+        public function mv_slider_settings_page() {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            require_once(MV_SLIDER_PATH . 'views/setting-page.php');
+        }
+    }
+ }
+
+ if (class_exists('MV_Slider')) {
+    register_activation_hook(__FILE__, ['MV_Slider', 'activate']);
+    register_deactivation_hook(__FILE__, ['MV_Slider', 'deactivate']);
+    register_uninstall_hook(__FILE__, ['MV_Slider', 'uninstall']);
+
+    $mv_slider = new MV_Slider();
+ }
+```
+
+#### Handling notifications
+
+```php
+<?php
+
+/**
+ * Plugin Name: MV Slider
+ * Plugin URI: https://wordpress.org/mv-slider
+ * Description: My plugin's description
+ * Version: 1.0.0
+ * Requires at least: 5.6
+ * Author: Hieu Nguyen Trong
+ * Author URI: https://dalatcoder.github.io
+ * Text Domain: mv-slider
+ * Domain Path: /languages
+ */
+
+ if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+ }
+
+ if (!class_exists('MV_Slider')) {
+    class MV_Slider {
+        function __construct() {
+            $this->define_constants();
+
+            add_action('admin_menu', [$this, 'add_menu']);
+
+            require_once(MV_SLIDER_PATH . 'post-types/mv-slider-cpt.php');
+            new MV_Slider_Post_Type();
+
+            require_once(MV_SLIDER_PATH . 'mv-slider-settings.php');
+            new MV_Slider_Settings();
+        }
+
+        public function define_constants() {
+            define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+            define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+            define('MV_SLIDER_VERSION', '1.0.0');
+        }
+
+        public static function activate() {
+            update_option('rewrite_rules', '');
+        }
+
+        public static function deactivate() {
+            flush_rewrite_rules();
+            unregister_post_type('mv-slider');
+        }
+
+        public static function uninstall() {
+
+        }
+
+        public function add_menu() {
+            add_menu_page(
+                'MV Slider Options',
+                'MV Slider',
+                'manage_options',
+                'mv_slider_admin',
+                [$this, 'mv_slider_settings_page'],
+                'dashicons-images-alt2'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Manage Slides',
+                'Manage Slides',
+                'manage_options',
+                'edit.php?post_type=mv_slider'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Add New Slide',
+                'Add New Slide',
+                'manage_options',
+                'post-new.php?post_type=mv_slider'
+            );
+        }
+
+        public function mv_slider_settings_page() {
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            if (isset($_GET['settings-updated'])) {
+                add_settings_error('mv_slider_options', 'mv_slider_message', 'Settings Saved', 'success');
+            }
+            settings_errors('mv_slider_options');
+
+            require_once(MV_SLIDER_PATH . 'views/setting-page.php');
+        }
+    }
+ }
+
+ if (class_exists('MV_Slider')) {
+    register_activation_hook(__FILE__, ['MV_Slider', 'activate']);
+    register_deactivation_hook(__FILE__, ['MV_Slider', 'deactivate']);
+    register_uninstall_hook(__FILE__, ['MV_Slider', 'uninstall']);
+
+    $mv_slider = new MV_Slider();
+ }
+```
