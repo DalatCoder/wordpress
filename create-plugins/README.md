@@ -825,3 +825,71 @@ Escaping function in WP:
     </tr>
 </table>
 ```
+
+### Nonces and other validations
+
+> Nonce - Number used once
+
+We use `nonce` to ensure the data is submitted from the form, not from other sources
+such as `bot`, or some client like `PostMan`,...
+
+First, we create an hidden input contains our nonce value
+
+```php
+<input type="hidden" name="mv_slider_nonce" value="<?= wp_create_nonce("mv_slider_nonce") ?>">
+```
+
+And then, we verify nonce in the code and other important validations like this
+
+```php
+function save_post($post_id) {
+    // validation
+    $nonce = '';
+    if (isset($_POST['mv_slider_nonce'])) {
+        $nonce = $_POST['mv_slider_nonce'];
+    }
+    if (!wp_verify_nonce($nonce, 'mv_slider_nonce')) {
+        return;
+    }
+
+    // prevent auto save feature
+    // only save when user submits the form
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    // check permission
+    if (isset($_POST['post_type']) && $_POST['post_type'] != 'mv_slider') {
+        return;
+    }
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+    if (!current_user_can('edit_page', $post_id)) {
+        return;
+    }
+
+    if (isset($_POST['action']) && $_POST['action'] == 'editpost') {
+        $old_text = get_post_meta($post_id, 'mv_slider_link_text', true);
+        $old_url = get_post_meta($post_id, 'mv_slider_link_url', true);
+
+        $new_text = $_POST['mv_slider_link_text'];
+        $new_url = $_POST['mv_slider_link_url'];
+
+        // sanitization
+        $new_text = sanitize_text_field($new_text);
+        $new_url = sanitize_text_field($new_url);
+
+        // validation
+        if (empty($new_text)) {
+            $new_text = 'Add some text';
+        }
+        if (empty($new_url)) {
+            $new_url = 'Add some URL';
+        }
+
+        update_post_meta($post_id, 'mv_slider_link_text', $new_text, $old_text);
+        update_post_meta($post_id, 'mv_slider_link_url', $new_url, $old_url);
+    }
+}
+```
