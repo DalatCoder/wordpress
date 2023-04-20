@@ -1,6 +1,50 @@
 # Creating Wordpress Plugins The Right Way
 
-## Before begins
+- [Creating Wordpress Plugins The Right Way](#creating-wordpress-plugins-the-right-way)
+  - [1. Before begins](#1-before-begins)
+    - [1.1. Action hooks](#11-action-hooks)
+    - [1.2. Filter hooks](#12-filter-hooks)
+  - [2. MV Slider Plugin Project](#2-mv-slider-plugin-project)
+    - [2.1. Overview](#21-overview)
+    - [2.2. Structuring the plugin](#22-structuring-the-plugin)
+    - [2.3. Plugin with `class` and plugin without `class`](#23-plugin-with-class-and-plugin-without-class)
+    - [2.4. Define some plugin constants](#24-define-some-plugin-constants)
+    - [2.5. Active, deactive and uninstall methods](#25-active-deactive-and-uninstall-methods)
+    - [2.6. Creating custom post type](#26-creating-custom-post-type)
+    - [2.7. Metabox API](#27-metabox-api)
+    - [2.8. Add Metabox](#28-add-metabox)
+    - [2.9. Create form inside metabox](#29-create-form-inside-metabox)
+    - [2.10. Saving metabox data](#210-saving-metabox-data)
+    - [2.11. Validating and sanitizing data before saving](#211-validating-and-sanitizing-data-before-saving)
+    - [2.12. Escaping data](#212-escaping-data)
+    - [2.13. Nonces and other validations](#213-nonces-and-other-validations)
+    - [2.14. Showing values on the post type table](#214-showing-values-on-the-post-type-table)
+    - [2.15. Adding menu to admin page](#215-adding-menu-to-admin-page)
+    - [2.16. Adding submenu page](#216-adding-submenu-page)
+    - [2.17. Setting page \& option API](#217-setting-page--option-api)
+      - [2.17.1. Introduction](#2171-introduction)
+      - [2.17.2. Building form](#2172-building-form)
+      - [2.17.3. Adding sections and fields](#2173-adding-sections-and-fields)
+      - [2.17.4. Validating setting values](#2174-validating-setting-values)
+      - [2.17.5. Manage permissions](#2175-manage-permissions)
+      - [2.17.6. Handling notifications](#2176-handling-notifications)
+      - [2.17.7. Splitting tabs](#2177-splitting-tabs)
+    - [2.18. Shortcode API](#218-shortcode-api)
+      - [2.18.1. Create shortcode class](#2181-create-shortcode-class)
+      - [2.18.2. Download flexslider2 files](#2182-download-flexslider2-files)
+      - [2.18.3. Create shortcode view](#2183-create-shortcode-view)
+      - [2.18.4. Using custom loop from WP\_Query to get CPT data](#2184-using-custom-loop-from-wp_query-to-get-cpt-data)
+      - [2.18.5. Register and enqueue scripts](#2185-register-and-enqueue-scripts)
+      - [2.18.6. Enqueue admin scripts](#2186-enqueue-admin-scripts)
+      - [2.18.7. Control JS logic from PHP](#2187-control-js-logic-from-php)
+      - [2.18.8. Using shortcode inside php file](#2188-using-shortcode-inside-php-file)
+    - [2.19. Plugin translation](#219-plugin-translation)
+      - [2.19.1. Intro](#2191-intro)
+      - [2.19.2. Load textdomain](#2192-load-textdomain)
+      - [2.19.3. Create `pot` template file](#2193-create-pot-template-file)
+    - [2.20. Uninstall the plugin](#220-uninstall-the-plugin)
+
+## 1. Before begins
 
 WordPress workflow: [Link](https://gist.github.com/johnbillion/4fa3c4228a8bb53cc71d)
 
@@ -113,7 +157,7 @@ add_filter('hook', 'test_filter');
 For better visualization, we use the plugin
 called `Simply Show Hooks`
 
-### Action hooks
+### 1.1. Action hooks
 
 Action hooks only work because of 2 functions
 that complete each other.
@@ -171,7 +215,7 @@ If the callback have the same priority number,
 then the order is specified by the order
 in code.
 
-### Filter hooks
+### 1.2. Filter hooks
 
 The `filter` hook received `param` and
 return that `param`, but in a modified format.
@@ -231,9 +275,9 @@ WP divides `filter` into 2 groups:
 
 Filter references: [link](https://codex.wordpress.org/Plugin_API/Filter_Reference)
 
-## MV Slider Plugin Project
+## 2. MV Slider Plugin Project
 
-### Overview
+### 2.1. Overview
 
 Slideshow plugin, based on FlexSlider2 at [link](http://flexslider.woothemes.com) or OwlCarousel.
 
@@ -250,7 +294,7 @@ Learn:
 - Security notions
 - Validate fields & sanitization
 
-### Structuring the plugin
+### 2.2. Structuring the plugin
 
 - Directory: `wp-content` -> `plugins`
 - Simple: one php file: `hello.php`
@@ -320,7 +364,7 @@ if (!defined('ABSPATH')) {
 
 We can try to access the file via browser: `host/wp-content/plugins/mv-slider/mv-slider.php`
 
-### Plugin with `class` and plugin without `class`
+### 2.3. Plugin with `class` and plugin without `class`
 
 In the course, the author will try to be as close as possible to
 the MVC pattern.
@@ -354,7 +398,7 @@ Set up plugin with `OOP` in PHP
  # $mv_slider->start();
 ```
 
-### Define some plugin constants
+### 2.4. Define some plugin constants
 
 - Plugin directory path (file system path): `define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));`, we will get the path like this: `/home/www/your_side/wp-content/plugins/your_plugins/`
 
@@ -379,7 +423,7 @@ Set up plugin with `OOP` in PHP
  }
 ```
 
-### Active, deactive and uninstall methods
+### 2.5. Active, deactive and uninstall methods
 
 We want to execute some code when the plugin is installing, deactivating
 or uninstalling.
@@ -423,7 +467,7 @@ Or we can use 2 functions with code
  $mv_slider = new MV_Slider();
 ```
 
-### Creating custom post type
+### 2.6. Creating custom post type
 
 Some wordpress default post types: `select post_type from wp_posts group by post_type`:
 
@@ -548,14 +592,14 @@ Instantiate our CPT
  }
 ```
 
-### Metabox API
+### 2.7. Metabox API
 
 Terms:
 
 - Metabox: UI
 - Metadata: some related information link to CPT
 
-### Add Metabox
+### 2.8. Add Metabox
 
 - Using action hook `add_metabox`
 - Or add attribute `register_meta_box_cb` in the `register_post_type` function
@@ -620,7 +664,7 @@ if (!class_exists('MV_Slider_Post_Type')) {
 }
 ```
 
-### Create form inside metabox
+### 2.9. Create form inside metabox
 
 Create new view file at `views/mv-slider_metabox.php` and then require
 it inside the function
@@ -674,7 +718,7 @@ For the view, we use the table to construct the UI
 </table>
 ```
 
-### Saving metabox data
+### 2.10. Saving metabox data
 
 Using action hook called `save_post` to intercept the process of
 wordpress.
@@ -732,7 +776,7 @@ function save_post($post_id) {
 }
 ```
 
-### Validating and sanitizing data before saving
+### 2.11. Validating and sanitizing data before saving
 
 > Never trust user supplied information
 
@@ -776,7 +820,7 @@ Now, if the `$new_text` = `"<script>alert(0)</script>"`, it will be sanitized to
 `""`, add then, the validation process occur, assign the default text `"Add some text"`
 to the `$new_text` variable.
 
-### Escaping data
+### 2.12. Escaping data
 
 Escaping function in WP:
 
@@ -826,7 +870,7 @@ Escaping function in WP:
 </table>
 ```
 
-### Nonces and other validations
+### 2.13. Nonces and other validations
 
 > Nonce - Number used once
 
@@ -894,7 +938,7 @@ function save_post($post_id) {
 }
 ```
 
-### Showing values on the post type table
+### 2.14. Showing values on the post type table
 
 We use a filter to hijack the content displaying on the table: `manage_<cpt>_posts_columns`.
 
@@ -966,7 +1010,7 @@ if (!class_exists('MV_Slider_Post_Type')) {
 }
 ```
 
-### Adding menu to admin page
+### 2.15. Adding menu to admin page
 
 WP has 5 different type of menus:
 
@@ -1049,7 +1093,7 @@ so we use this capability to restrict the access to our menu.
  }
 ```
 
-### Adding submenu page
+### 2.16. Adding submenu page
 
 Hide our CPT menu by setting the attribute `show_in_menu` to `false`.
 
@@ -1130,9 +1174,9 @@ Then, add 2 submenu to manage our CPT.
  }
 ```
 
-### Setting page & option API
+### 2.17. Setting page & option API
 
-#### Introduction
+#### 2.17.1. Introduction
 
 Store all plugin setting key-value pairs inside the `wp_options` table using
 `Options API`
@@ -1142,7 +1186,7 @@ Some advantages of using setting page & options api:
 - Don't have to build UI from scratch
 - Don't have to worry about security issues such as nonce,...
 
-#### Building form
+#### 2.17.2. Building form
 
 Setting up our view file
 
@@ -1208,7 +1252,7 @@ To add field and section to our form, we must use 2 WP functions
 - `settings_fields()`
 - `do_secttings_sections()`
 
-#### Adding sections and fields
+#### 2.17.3. Adding sections and fields
 
 Register setting key
 
@@ -1313,7 +1357,7 @@ if (!class_exists('MV_Slider_Settings')) {
 </div>
 ```
 
-#### Validating setting values
+#### 2.17.4. Validating setting values
 
 To validate input value from settings page, we could follow this
 
@@ -1367,7 +1411,7 @@ if (!class_exists('MV_Slider_Settings')) {
 }
 ```
 
-#### Manage permissions
+#### 2.17.5. Manage permissions
 
 Prevent user from accessing the setting page directly by URL
 
@@ -1469,7 +1513,7 @@ Prevent user from accessing the setting page directly by URL
  }
 ```
 
-#### Handling notifications
+#### 2.17.6. Handling notifications
 
 ```php
 <?php
@@ -1574,7 +1618,7 @@ Prevent user from accessing the setting page directly by URL
  }
 ```
 
-#### Splitting tabs
+#### 2.17.7. Splitting tabs
 
 ```php
 <?php 
@@ -1607,7 +1651,7 @@ Prevent user from accessing the setting page directly by URL
 </div>
 ```
 
-### Shortcode API
+### 2.18. Shortcode API
 
 They are shortcut, they are short tags that any WP user can add to post,
 page or anywhere else.
@@ -1619,7 +1663,7 @@ instead of having to write code.
 - Shortcode attributes: `[mv_slider id='1' orderby='random']`
 - Or using completed tag with content like this: `[mv_slider]Hello world[/mv_slider]`
 
-#### Create shortcode class
+#### 2.18.1. Create shortcode class
 
 ```php
 <?php 
@@ -1652,7 +1696,7 @@ if (!class_exists('MV_Slider_Shortcode')) {
 }
 ```
 
-#### Download flexslider2 files
+#### 2.18.2. Download flexslider2 files
 
 [Flexslider](http://flexslider.woothemes.com/)
 
@@ -1674,7 +1718,7 @@ jQuery(window).load(function() {
 });
 ```
 
-#### Create shortcode view
+#### 2.18.3. Create shortcode view
 
 Create simple view with raw HTML
 
@@ -1788,7 +1832,7 @@ if (!class_exists('MV_Slider_Shortcode')) {
 }
 ```
 
-#### Using custom loop from WP_Query to get CPT data
+#### 2.18.4. Using custom loop from WP_Query to get CPT data
 
 Build custom query from `WP_Query`
 
@@ -1885,7 +1929,7 @@ Using loop to get all CPT
 </div>
 ```
 
-#### Register and enqueue scripts
+#### 2.18.5. Register and enqueue scripts
 
 WP puts each `js` and `css` inside a queue and enqueue it in order.
 
@@ -2087,7 +2131,7 @@ if (!class_exists('MV_Slider_Shortcode')) {
 }
 ```
 
-#### Enqueue admin scripts
+#### 2.18.6. Enqueue admin scripts
 
 Using an action hook called `admin_enqueue_scripts`, then
 we can use `$typenow` to check whether to enqueue our scripts or styles.
@@ -2245,7 +2289,7 @@ we can use `$typenow` to check whether to enqueue our scripts or styles.
  }
 ```
 
-#### Control JS logic from PHP
+#### 2.18.7. Control JS logic from PHP
 
 - Using embeded `<script>` tag inside `php` file
 - Using script localization in wordpress
@@ -2336,7 +2380,7 @@ if (!class_exists('MV_Slider_Shortcode')) {
 }
 ```
 
-#### Using shortcode inside php file
+#### 2.18.8. Using shortcode inside php file
 
 Using `do_shortcode` function like this
 
@@ -2346,9 +2390,9 @@ Using `do_shortcode` function like this
 echo do_shortcode('[mv_slider]');
 ```
 
-### Plugin translation
+### 2.19. Plugin translation
 
-#### Intro
+#### 2.19.1. Intro
 
 The process of translation is sometime called localization or internalization.
 
@@ -2376,7 +2420,7 @@ having this file enhance the translator. And then, we can generate the
 - `po` file contains text for human
 - `mo` file contains text for machine (WP needs this file)
 
-#### Load textdomain
+#### 2.19.2. Load textdomain
 
 ```php
 <?php
@@ -2541,12 +2585,12 @@ having this file enhance the translator. And then, we can generate the
  }
 ```
 
-#### Create `pot` template file
+#### 2.19.3. Create `pot` template file
 
 - Download `poedit` software
 - Download blank `pot` template at [link](https://github.com/fxbenard/Blank-WordPress-Pot)
 
-### Uninstall the plugin
+### 2.20. Uninstall the plugin
 
 ```php
 function uninstall() {
