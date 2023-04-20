@@ -1048,3 +1048,84 @@ so we use this capability to restrict the access to our menu.
     $mv_slider = new MV_Slider();
  }
 ```
+
+### Adding submenu page
+
+Hide our CPT menu by setting the attribute `show_in_menu` to `false`.
+
+Then, add 2 submenu to manage our CPT.
+
+```php
+<?php
+
+ if (!class_exists('MV_Slider')) {
+    class MV_Slider {
+        function __construct() {
+            $this->define_constants();
+
+            add_action('admin_menu', [$this, 'add_menu']);
+
+            require_once(MV_SLIDER_PATH . 'post-types/mv-slider-cpt.php');
+            new MV_Slider_Post_Type();
+        }
+
+        public function define_constants() {
+            define('MV_SLIDER_PATH', plugin_dir_path(__FILE__));
+            define('MV_SLIDER_URL', plugin_dir_url(__FILE__));
+            define('MV_SLIDER_VERSION', '1.0.0');
+        }
+
+        public static function activate() {
+            update_option('rewrite_rules', '');
+        }
+
+        public static function deactivate() {
+            flush_rewrite_rules();
+            unregister_post_type('mv-slider');
+        }
+
+        public static function uninstall() {
+
+        }
+
+        public function add_menu() {
+            add_menu_page(
+                'MV Slider Options',
+                'MV Slider',
+                'manage_options',
+                'mv_slider_admin',
+                [$this, 'mv_slider_settings_page'],
+                'dashicons-images-alt2'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Manage Slides',
+                'Manage Slides',
+                'manage_options',
+                'edit.php?post_type=mv_slider'
+            );
+
+            add_submenu_page(
+                'mv_slider_admin',
+                'Add New Slide',
+                'Add New Slide',
+                'manage_options',
+                'post-new.php?post_type=mv_slider'
+            );
+        }
+
+        public function mv_slider_settings_page() {
+            echo 'Hello';
+        }
+    }
+ }
+
+ if (class_exists('MV_Slider')) {
+    register_activation_hook(__FILE__, ['MV_Slider', 'activate']);
+    register_deactivation_hook(__FILE__, ['MV_Slider', 'deactivate']);
+    register_uninstall_hook(__FILE__, ['MV_Slider', 'uninstall']);
+
+    $mv_slider = new MV_Slider();
+ }
+```
