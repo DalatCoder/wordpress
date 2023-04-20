@@ -1312,3 +1312,57 @@ if (!class_exists('MV_Slider_Settings')) {
     </form>
 </div>
 ```
+
+#### Validating setting values
+
+To validate input value from settings page, we could follow this
+
+- Add callback to validate value when register setting page: `register_setting('mv_slider_group', 'mv_slider_options', [$this, 'mv_slider_validations']);`
+- Write validation logic inside the callback function.
+
+```php
+<?php 
+
+if (!class_exists('MV_Slider_Settings')) {
+    class MV_Slider_Settings {
+        public static $options;
+
+        public function __construct() {
+            self::$options = get_option('mv_slider_options');
+
+            add_action('admin_init', [$this, 'admin_init']);
+        }
+
+        public function admin_init() {
+            register_setting('mv_slider_group', 'mv_slider_options', [$this, 'mv_slider_validations']);
+        }
+
+        public function mv_slider_validations($input) {
+            $new_input = [];
+
+            foreach($input as $key => $value) {
+                switch($key) {
+                    case 'mv_slider_title':
+                        if (empty($value)) {
+                            $value = 'Please type some text';
+                        }
+
+                        $new_input[$key] = sanitize_text_field($value);
+                        break;
+                    case 'mv_slider_url':
+                        $new_input[$key] = esc_url_raw($value);
+                        break;
+                    case 'mv_slider_int':
+                        $new_input[$key] = absint($value);
+                        break;
+                    default:
+                        $new_input[$key] = sanitize_text_field($value);
+                        break;
+                }
+            }
+
+            return $new_input;
+        }
+    }
+}
+```
