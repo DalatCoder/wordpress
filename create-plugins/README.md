@@ -43,6 +43,9 @@
       - [2.19.2. Load textdomain](#2192-load-textdomain)
       - [2.19.3. Create `pot` template file](#2193-create-pot-template-file)
     - [2.20. Uninstall the plugin](#220-uninstall-the-plugin)
+  - [MV Testimonials Plugin Project](#mv-testimonials-plugin-project)
+    - [Setup](#setup)
+    - [Create CPT with archived page support](#create-cpt-with-archived-page-support)
 
 ## 1. Before begins
 
@@ -2606,6 +2609,122 @@ function uninstall() {
 
     foreach ($posts as $post) {
         wp_delete_post($post->ID, true);
+    }
+}
+```
+
+## MV Testimonials Plugin Project
+
+### Setup
+
+```php
+<?php
+
+/**
+ * Plugin Name: MV Testimonials
+ * Plugin URI: https://wordpress.org/mv-testimonials
+ * Description: My plugin's description
+ * Version: 1.0.0
+ * Requires at least: 5.6
+ * Author: Hieu Nguyen Trong
+ * Author URI: https://dalatcoder.github.io
+ * Text Domain: mv-testimonials
+ * Domain Path: /languages
+ */
+
+ if (!defined('ABSPATH')) {
+    die('Im just a plugin');
+ }
+
+ if (!class_exists('MV_Testimonials')) {
+    class MV_Testimonials {
+        function __construct() {
+            $this->define_constants();
+            $this->load_text_domain();
+
+            require_once(MV_TESTIMONIALS_PATH . 'post-types/mv-testimonials-cpt.php');
+            new MV_Testimonials_Post_Type();
+        }
+
+        public function define_constants() {
+            define('MV_TESTIMONIALS_PATH', plugin_dir_path(__FILE__));
+            define('MV_TESTIMONIALS_URL', plugin_dir_url(__FILE__));
+            define('MV_TESTIMONIALS_VERSION', '1.0.0');
+        }
+
+        public static function activate() {
+            update_option('rewrite_rules', '');
+        }
+
+        public static function deactivate() {
+            unregister_post_type('mv-testimonials');
+            flush_rewrite_rules();
+        }
+
+        public static function uninstall() {
+        }
+
+        public function load_text_domain() {
+            load_plugin_textdomain(
+                'mv-testimonials',
+                false, 
+                dirname(plugin_basename(__FILE__)) . '/languages/'
+            );
+        }
+    }
+ }
+
+ if (class_exists('MV_Testimonials')) {
+    register_activation_hook(__FILE__, ['MV_Testimonials', 'activate']);
+    register_deactivation_hook(__FILE__, ['MV_Testimonials', 'deactivate']);
+    register_uninstall_hook(__FILE__, ['MV_Testimonials', 'uninstall']);
+
+    new MV_Testimonials();
+ }
+```
+
+### Create CPT with archived page support
+
+```php
+<?php 
+
+if (!class_exists('MV_Testimonials_Post_Type')) {
+    class MV_Testimonials_Post_Type {
+        public function __construct() {
+            add_action('init', [$this, 'create_post_type']);
+        }
+
+        public function create_post_type() {
+            register_post_type(
+                'mv-testimonials', 
+                [
+                    'label' => esc_html__('Testimonial', 'mv-testimonials'),
+                    'description' => esc_html__('Testimonials', 'mv-testimonials'),
+                    'labels' => [
+                        'name' => esc_html__('Testimonials', 'mv-testimonials'),
+                        'singular_name' => esc_html__('Testimonial', 'mv-testimonials')
+                    ],
+                    'public' => true,
+                    'supports' => [
+                        'title',
+                        'editor',
+                        'thumbnail'
+                    ],
+                    'hierarchical' => false,
+                    'show_ui' => true,
+                    'show_in_menu' => true,
+                    'menu_position' => 5,
+                    'show_in_admin_bar' => true,
+                    'show_in_nav_menus' => true,
+                    'can_export' => true,
+                    'has_archive' => true,
+                    'exclude_from_search' => false,
+                    'publicly_queryable' => true,
+                    'show_in_rest' => true,
+                    'menu_icon' => 'dashicons-testimonial'
+                ]
+            );
+        }
     }
 }
 ```
