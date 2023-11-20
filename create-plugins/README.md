@@ -47,6 +47,8 @@
     - [Setup](#setup)
     - [Create CPT with archived page support](#create-cpt-with-archived-page-support)
     - [Create metaboxes with custom fields](#create-metaboxes-with-custom-fields)
+    - [Widgets](#widgets)
+      - [Introduction to widgets](#introduction-to-widgets)
 
 ## 1. Before begins
 
@@ -2839,3 +2841,9 @@ if (!class_exists('MV_Testimonials_Post_Type')) {
     }
 }
 ```
+
+### Widgets
+
+#### Introduction to widgets
+ 
+Widgets are be all objects that generate some HTML code.
