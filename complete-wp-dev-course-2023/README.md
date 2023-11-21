@@ -1,26 +1,29 @@
-# Complete WordPress Developer Course 2023 - Plugins & Themes
+# 1. Complete WordPress Developer Course 2023 - Plugins & Themes
 
-- [Complete WordPress Developer Course 2023 - Plugins \& Themes](#complete-wordpress-developer-course-2023---plugins--themes)
-  - [1. Getting started](#1-getting-started)
-    - [1.1. What to expect](#11-what-to-expect)
-    - [1.2. What is an environment?](#12-what-is-an-environment)
-    - [1.3. Installing WordPress](#13-installing-wordpress)
-    - [1.4. `Local` quick tour](#14-local-quick-tour)
-    - [1.5. Text editors](#15-text-editors)
-  - [2. PHP Fundamentals](#2-php-fundamentals)
-    - [2.1. Introduction to PHP](#21-introduction-to-php)
-    - [2.2. Variables](#22-variables)
-    - [2.3. Strings and Booleans](#23-strings-and-booleans)
-    - [2.4. Functions](#24-functions)
-    - [2.5. Arrays](#25-arrays)
-    - [2.6. Loops](#26-loops)
-    - [2.7. Constants](#27-constants)
-    - [2.8. Understanding Errors](#28-understanding-errors)
-    - [2.9. Comments](#29-comments)
+- [1. Complete WordPress Developer Course 2023 - Plugins \& Themes](#1-complete-wordpress-developer-course-2023---plugins--themes)
+  - [1.1. Getting started](#11-getting-started)
+    - [1.1.1. What to expect](#111-what-to-expect)
+    - [1.1.2. What is an environment?](#112-what-is-an-environment)
+    - [1.1.3. Installing WordPress](#113-installing-wordpress)
+    - [1.1.4. `Local` quick tour](#114-local-quick-tour)
+    - [1.1.5. Text editors](#115-text-editors)
+  - [1.2. PHP Fundamentals](#12-php-fundamentals)
+    - [1.2.1. Introduction to PHP](#121-introduction-to-php)
+    - [1.2.2. Variables](#122-variables)
+    - [1.2.3. Strings and Booleans](#123-strings-and-booleans)
+    - [1.2.4. Functions](#124-functions)
+    - [1.2.5. Arrays](#125-arrays)
+    - [1.2.6. Loops](#126-loops)
+    - [1.2.7. Constants](#127-constants)
+    - [1.2.8. Understanding Errors](#128-understanding-errors)
+    - [1.2.9. Comments](#129-comments)
+  - [1.3. Kickstarting a Theme](#13-kickstarting-a-theme)
+    - [1.3.1. Exploring the WordPress Configuration](#131-exploring-the-wordpress-configuration)
+    - [Adjusting the configuration](#adjusting-the-configuration)
 
-## 1. Getting started
+## 1.1. Getting started
 
-### 1.1. What to expect
+### 1.1.1. What to expect
 
 - Custom post types
 - Extending the REST API
@@ -32,14 +35,14 @@
 - Code optimization
 - ...
 
-### 1.2. What is an environment?
+### 1.1.2. What is an environment?
 
 - Learn why it's important to have an environment for WordPress
 - A location where your code runs
 - **Production**: Publicly accessible, managed by a company
 - **Development**: Private, managed by developer, using `Local` tool to config WP dev environment
 
-### 1.3. Installing WordPress
+### 1.1.3. Installing WordPress
 
 - Installing WordPress through `Local`
 - WordPress needs 3 programs to run:
@@ -51,7 +54,7 @@
 - A web server is responsible for exposing files via an HTTP URL
 - A database is a program for storing info
 
-### 1.4. `Local` quick tour
+### 1.1.4. `Local` quick tour
 
 - Select site
 - Change site domain
@@ -61,18 +64,18 @@
   - `log`: logs
   - `app`: website
 
-### 1.5. Text editors
+### 1.1.5. Text editors
 
 In this course, I'll be using a text editor called Visual Studio Code.
 
-## 2. PHP Fundamentals
+## 1.2. PHP Fundamentals
 
-### 2.1. Introduction to PHP
+### 1.2.1. Introduction to PHP
 
 PHP: it's a programming language that runs on servers to process web pages. A programming language
 allows us to give instructions to a machine.
 
-### 2.2. Variables
+### 1.2.2. Variables
 
 > Variables allow us to store values.
 
@@ -92,7 +95,7 @@ Variable naming rules
 ?>
 ```
 
-### 2.3. Strings and Booleans
+### 1.2.3. Strings and Booleans
 
 Data can be categorized. Aside from numbers, we can also use strings and booleans.
 
@@ -116,7 +119,7 @@ Data types:
 ?>
 ```
 
-### 2.4. Functions
+### 1.2.4. Functions
 
 A function is a block of code that can perform a specific task.
 
@@ -133,7 +136,7 @@ A function is a block of code that can perform a specific task.
 ?>
 ```
 
-### 2.5. Arrays
+### 1.2.5. Arrays
 
 PHP array can store a collection of data.
 
@@ -147,7 +150,7 @@ PHP array can store a collection of data.
 ?>
 ```
 
-### 2.6. Loops
+### 1.2.6. Loops
 
 Using loops to iterate through the array
 
@@ -164,7 +167,7 @@ Using loops to iterate through the array
 ?>
 ```
 
-### 2.7. Constants
+### 1.2.7. Constants
 
 A constant is a variable that cannot have its value updated.
 Constants can be reliable for storing data that never needs to change.
@@ -176,7 +179,7 @@ Constants can be reliable for storing data that never needs to change.
 ?>
 ```
 
-### 2.8. Understanding Errors
+### 1.2.8. Understanding Errors
 
 ```php
 <?php 
@@ -188,7 +191,7 @@ Constants can be reliable for storing data that never needs to change.
 ?>
 ```
 
-### 2.9. Comments
+### 1.2.9. Comments
 
 ```php
 <?php 
@@ -200,5 +203,26 @@ Constants can be reliable for storing data that never needs to change.
      *  comment
      */
     echo NAME;
+?>
+```
+
+## 1.3. Kickstarting a Theme
+
+### 1.3.1. Exploring the WordPress Configuration
+
+The configuration file is loaded on every request.
+
+It can be found in the root directory of your WordPress installation, the file is called `wp-config.php`
+
+WordPress configuration settings are defined with constants.
+
+### Adjusting the configuration
+
+Enable debug mode in WordPress
+
+```php
+<?php 
+    define('WP_DEBUG', true);
+    define('WP_DISABLE_FATAL_ERROR_HANDLER', true);
 ?>
 ```
